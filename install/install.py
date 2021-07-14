@@ -2139,6 +2139,7 @@ vmail
 def main():
     parser = argparse.ArgumentParser(description='CyberPanel Installer')
     parser.add_argument('publicip', help='Please enter public IP for your VPS or dedicated server.')
+    parser.add_argument('--publicip6', help='Specify public IPv6 for your VPS or dedicated server.')
     parser.add_argument('--mysql', help='Specify number of MySQL instances to be used.')
     parser.add_argument('--postfix', help='Enable or disable Email Service.')
     parser.add_argument('--powerdns', help='Enable or disable DNS Service.')
@@ -2186,6 +2187,10 @@ def main():
 
     machineIP = open("/etc/cyberpanel/machineIP", "w")
     machineIP.writelines(args.publicip)
+
+    if args.publicip6 != None:
+        machineIP.writelines(args.publicip6)
+
     machineIP.close()
 
     cwd = os.getcwd()

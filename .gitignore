@@ -5,3 +5,7 @@
 .idea
 venv
 /.venv/
+/.vs/*
+/.vscode/*
+CyberPanel.pyproj.user
+CyberPanel.pyproj

@@ -61,6 +61,7 @@ PowerDNS_Switch="On"
 PureFTPd_Switch="On"
 
 Server_IP=""
+Server_IPv6=""
 Server_Country="Unknow"
 Server_OS=""
 Server_OS_Version=""
@@ -201,6 +202,12 @@ echo -e "\nChecking root privileges..."
   fi
 }
 
+Check_IPv6_Valid() {
+  # IPv6 RegEx from https://stackoverflow.com/a/17871737 modified to only allow IPv6 addresses
+  # and zero compressed IPv6 addresses, but not link local or IPv4 mapped
+  [[ $1 =~ ^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:))$ ]]
+}
+
 Check_Server_IP() {
 Server_IP=$(curl --silent --max-time 30 -4 https://cyberpanel.sh/?ip)
   if [[ $Server_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -209,6 +216,15 @@ Server_IP=$(curl --silent --max-time 30 -4 https://cyberpanel.sh/?ip)
     echo -e "Can not detect IP, exit..."
     Debug_Log2 "Can not detect IP. [404]"
     exit
+  fi
+
+# Check if the server has an IPv6 address
+Server_IPv6=$(curl --silent --max-time 30 -6 http://v6.ipv6-test.com/api/myip.php)
+  if [[ Check_IPv6_Valid $Server_IPv6 ]]
+    echo -e "Valid IPv6 detected..."
+  else
+    echo -e "Can not detect IPv6"
+    Server_IPv6=""
   fi
 
 echo -e "\nChecking server location...\n"
@@ -1332,6 +1348,10 @@ Final_Flags+=(${License_Key:+$License_Key})
 Final_Flags+=(--postfix "${Postfix_Switch^^}")
 Final_Flags+=(--powerdns "${PowerDNS_Switch^^}")
 Final_Flags+=(--ftp "${PureFTPd_Switch^^}")
+
+if [[ ! "$Server_IPv6" = "" ]] ; then
+  Final_Flags+=(--publicip6 "$Server_IPv6")
+fi
 
 if [[ "$Redis_Hosting" = "Yes" ]] ; then
   Final_Flags+=(--redis enable)
