@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.shortcuts import render, HttpResponse
+from plogical.ip import IPManager
 import json
 
 class httpProc:
@@ -34,10 +35,7 @@ class httpProc:
                 if self.data == None:
                     self.data = {}
 
-                ipFile = "/etc/cyberpanel/machineIP"
-                f = open(ipFile)
-                ipData = f.read()
-                ipAddress = ipData.split('\n', 1)[0]
+                ipAddress = IPManager.getIPv4Addresses()[0]
                 self.data['ipAddress'] = ipAddress
                 self.data['fullName'] = '%s %s' % (admin.firstName, admin.lastName)
 
