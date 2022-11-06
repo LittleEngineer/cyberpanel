@@ -112,7 +112,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cyberpanel',
         'USER': 'cyberpanel',
-        'PASSWORD': 'Bz9gF7Hr7X4RtD',
+        'PASSWORD': 'VY7ZbcQREu6mSC',
         'HOST': 'localhost',
         'PORT': ''
     },
@@ -120,7 +120,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mysql',
         'USER': 'root',
-        'PASSWORD': 'sXm5VlRaAsXkDd',
+        'PASSWORD': 'VY7ZbcQREu6mSC',
         'HOST': 'localhost',
         'PORT': '',
     },
@@ -191,6 +191,6 @@ LANGUAGES = (
     ('bn', _('Bangla')),
 )
 
-MEDIA_URL = '/home/cyberpanel/media/'
+MEDIA_URL = '/usr/local/CyberCP/tmp/'
 MEDIA_ROOT = MEDIA_URL
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800

@@ -7,43 +7,26 @@ from .models import *
 from xml.etree import ElementTree
 from plogical.CyberCPLogFileWriter import CyberCPLogFileWriter as logging
 
+
 class PHPManager:
 
     @staticmethod
     def findPHPVersions():
         distro = ProcessUtilities.decideDistro()
         if distro == ProcessUtilities.centos:
-            return ['PHP 5.3', 'PHP 5.4', 'PHP 5.5', 'PHP 5.6', 'PHP 7.0', 'PHP 7.1', 'PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0']
+            return ['PHP 5.3', 'PHP 5.4', 'PHP 5.5', 'PHP 5.6', 'PHP 7.0', 'PHP 7.1', 'PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0', 'PHP 8.1']
         elif distro == ProcessUtilities.cent8:
-            return ['PHP 7.1','PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0']
+            return ['PHP 7.1','PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0', 'PHP 8.1']
         elif distro == ProcessUtilities.ubuntu20:
-            return ['PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0']
+            return ['PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0', 'PHP 8.1']
         else:
-            return ['PHP 7.0', 'PHP 7.1', 'PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0']
+            return ['PHP 7.0', 'PHP 7.1', 'PHP 7.2', 'PHP 7.3', 'PHP 7.4', 'PHP 8.0', 'PHP 8.1']
 
     @staticmethod
     def getPHPString(phpVersion):
-
-        if phpVersion == "PHP 5.3":
-            php = "53"
-        elif phpVersion == "PHP 5.4":
-            php = "54"
-        elif phpVersion == "PHP 5.5":
-            php = "55"
-        elif phpVersion == "PHP 5.6":
-            php = "56"
-        elif phpVersion == "PHP 7.0":
-            php = "70"
-        elif phpVersion == "PHP 7.1":
-            php = "71"
-        elif phpVersion == "PHP 7.2":
-            php = "72"
-        elif phpVersion == "PHP 7.3":
-            php = "73"
-        elif phpVersion == "PHP 7.4":
-            php = "74"
-        elif phpVersion == "PHP 8.0":
-            php = "80"
+        # Ex: "PHP 5.3" type string, return Ex: "53" type string
+        phpVersion = phpVersion.split()
+        php = phpVersion[1].replace(".", "")
 
         return php
 
@@ -134,22 +117,22 @@ class PHPManager:
         max_input_time = data['max_input_time']
         post_max_size = data['post_max_size']
 
-        if allow_url_fopen == True:
+        if allow_url_fopen:
             allow_url_fopen = "allow_url_fopen = On"
         else:
             allow_url_fopen = "allow_url_fopen = Off"
 
-        if display_errors == True:
+        if display_errors:
             display_errors = "display_errors = On"
         else:
             display_errors = "display_errors = Off"
 
-        if file_uploads == True:
+        if file_uploads:
             file_uploads = "file_uploads = On"
         else:
             file_uploads = "file_uploads = Off"
 
-        if allow_url_include == True:
+        if allow_url_include:
             allow_url_include = "allow_url_include = On"
         else:
             allow_url_include = "allow_url_include = Off"
@@ -303,7 +286,3 @@ class PHPManager:
         json_data = json_data + ']'
         final_json = json.dumps({'status': 1, 'error_message': "None", "data": json_data})
         return HttpResponse(final_json)
-
-
-
-

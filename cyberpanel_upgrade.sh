@@ -4,8 +4,8 @@
 #set -x
 #set -u
 
-#CyberPanel installer script for CentOS 7.X, CentOS 8.X, CloudLinux 7.X, Ubuntu 18.04 and Ubuntu 20.04
-#For whoever may edit this script, please follow :
+#CyberPanel installer script for CentOS 7, CentOS 8, CloudLinux 7, AlmaLinux 8, RockyLinux 8, Ubuntu 18.04, Ubuntu 20.04, Ubuntu 20.10, openEuler 20.03 and openEuler 22.03
+#For whoever may edit this script, please follow:
 #Please use Pre_Install_xxx() and Post_Install_xxx() if you want to something respectively before or after the panel installation
 #and update below accordingly
 #Please use variable/functions name as MySomething or My_Something, and please try not to use too-short abbreviation :)
@@ -20,7 +20,7 @@ export LC_CTYPE=en_US.UTF-8
 echo -e "\nFetching latest data from CyberPanel server...\n"
 echo -e "This may take few seconds..."
 
-Server_Country="Unknow"
+Server_Country="Unknown"
 Server_OS=""
 Server_OS_Version=""
 Server_Provider='Undefined'
@@ -41,8 +41,8 @@ MySQL_Password=$(cat /etc/cyberpanel/mysqlPassword)
 
 
 LSWS_Latest_URL="https://cyberpanel.sh/update.litespeedtech.com/ws/latest.php"
-curl --silent --max-time 30 -4  -o /tmp/lsws_latest "$LSWS_Latest_URL" 2>/dev/null
-LSWS_Stable_Line=$(grep "LSWS_STABLE" /tmp/lsws_latest)
+LSWS_Tmp=$(curl --silent --max-time 30 -4 "$LSWS_Latest_URL")
+LSWS_Stable_Line=$(echo "$LSWS_Tmp" | grep "LSWS_STABLE")
 LSWS_Stable_Version=$(expr "$LSWS_Stable_Line" : '.*LSWS_STABLE=\(.*\) BUILD .*')
 #grab the LSWS latest stable version.
 
@@ -54,7 +54,7 @@ cd /root/cyberpanel_upgrade_tmp || exit
 }
 
 Debug_Log() {
-echo -e "\n${1}=${2}\n" >> /tmp/cyberpanel_debug_upgrade.log
+echo -e "\n${1}=${2}\n" >>  "/var/log/cyberpanel_debug_upgrade_$(date +"%Y-%m-%d")_${Random_Log_Name}.log"
 }
 
 Debug_Log2() {
@@ -64,18 +64,18 @@ echo -e "\n${1}" >> /var/log/upgradeLogs.txt
 Check_Root() {
 echo -e "\nChecking root privileges..."
   if echo "$Sudo_Test" | grep SUDO >/dev/null; then
-    echo -e "\nYou are using SUDO , please run as root user...\n"
+    echo -e "\nYou are using SUDO, please run as root user...\n"
     echo -e "\nIf you don't have direct access to root user, please run \e[31msudo su -\e[39m command (do NOT miss the \e[31m-\e[39m at end or it will fail) and then run installation command again."
     exit
   fi
 
   if [[ $(id -u) != 0 ]] >/dev/null; then
-    echo -e "\nYou must run on root user to install CyberPanel...\n"
-    echo -e "or run following command: (do NOT miss the quotes)"
+    echo -e "\nYou must run as root user to install CyberPanel...\n"
+    echo -e "or run the following command: (do NOT miss the quotes)"
     echo -e "\e[31msudo su -c \"sh <(curl https://cyberpanel.sh || wget -O - https://cyberpanel.sh)\"\e[39m"
     exit 1
   else
-    echo -e "\nYou are runing as root...\n"
+    echo -e "\nYou are running as root...\n"
   fi
 }
 
@@ -84,7 +84,7 @@ echo -e "Checking server location...\n"
 
 Server_Country=$(curl --silent --max-time 10 -4 https://cyberpanel.sh/?country)
 if [[ ${#Server_Country} != "2" ]] ; then
-  Server_Country="Unknow"
+  Server_Country="Unknown"
 fi
 
 if [[ "$Debug" = "On" ]] ; then
@@ -93,7 +93,7 @@ fi
 
 if [[ "$*" = *"--mirror"* ]] ; then
   Server_Country="CN"
-  echo -e "Force to use mirror server due to --mirror argument...\n"
+  echo -e "Forced to use mirror server due to --mirror argument...\n"
 fi
 
 if [[ "$Server_Country" = *"CN"* ]] ; then
@@ -104,12 +104,12 @@ fi
 
 Check_OS() {
 if [[ ! -f /etc/os-release ]] ; then
-  echo -e "Unable to detect the operating system...\n"
+  echo -e "Unable to detect the Operating System...\n"
   exit
 fi
 
-if ! uname -m | grep -q 64 ; then
-  echo -e "x64 system is required...\n"
+if ! uname -m | grep -q x86_64 ; then
+  echo -e "x86_64 system is required...\n"
   exit
 fi
 
@@ -121,22 +121,24 @@ elif grep -q "AlmaLinux-8" /etc/os-release ; then
   Server_OS="AlmaLinux"
 elif grep -q -E "Ubuntu 18.04|Ubuntu 20.04|Ubuntu 20.10" /etc/os-release ; then
   Server_OS="Ubuntu"
+elif grep -q -E "openEuler 20.03|openEuler 22.03" /etc/os-release ; then
+  Server_OS="openEuler"
 else
   echo -e "Unable to detect your system..."
-  echo -e "\nCyberPanel is supported on Ubuntu 18.04 x86_64, Ubuntu 20.04 x86_64, Ubuntu 20.10 x86_64, CentOS 7.x, CentOS 8.x, CloudLinux 7.x and AlmaLinux 8.x...\n"
-  Debug_Log2 "CyberPanel is supported on Ubuntu 18.04 x86_64, Ubuntu 20.04 x86_64, Ubuntu 20.10 x86_64, CentOS 7.x, CentOS 8.x, AlmaLinux 8.x... [404]"
+  echo -e "\nCyberPanel is supported on x86_64 based Ubuntu 18.04, Ubuntu 20.04, Ubuntu 20.10, Ubuntu 22.04, CentOS 7, CentOS 8, AlmaLinux 8, RockyLinux 8, CloudLinux 7, CloudLinux 8, openEuler 20.03, openEuler 22.03...\n"
+  Debug_Log2 "CyberPanel is supported on x86_64 based Ubuntu 18.04, Ubuntu 20.04, Ubuntu 20.10, Ubuntu 22.04, CentOS 7, CentOS 8, AlmaLinux 8, RockyLinux 8, CloudLinux 7, CloudLinux 8, openEuler 20.03, openEuler 22.03... [404]"
   exit
 fi
 
 Server_OS_Version=$(grep VERSION_ID /etc/os-release | awk -F[=,] '{print $2}' | tr -d \" | head -c2 | tr -d . )
-#to make 20.04 display as 20
+#to make 20.04 display as 20, etc.
 
 echo -e "System: $Server_OS $Server_OS_Version detected...\n"
 
 if [[ $Server_OS = "CloudLinux" ]] || [[ "$Server_OS" = "AlmaLinux" ]] ; then
   Server_OS="CentOS"
-  #CloudLinux gives version id like 7.8 , 7.9 , so cut it to show first number only
-  #treat CL and Alma as CentOS
+  #CloudLinux gives version id like 7.8, 7.9, so cut it to show first number only
+  #treat CloudLinux, Rocky and Alma as CentOS
 fi
 
 if [[ "$Debug" = "On" ]] ; then
@@ -356,11 +358,11 @@ if [[ "$Server_OS" = "CentOS" ]] ; then
       Check_Return "yum repo" "no_exit"
 
     cat << EOF > /etc/yum.repos.d/MariaDB.repo
-# MariaDB 10.5 CentOS repository list - created 2020-09-08 14:54 UTC
+# MariaDB 10.4 CentOS repository list - created 2021-08-06 02:01 UTC
 # http://downloads.mariadb.org/mariadb/repositories/
 [mariadb]
 name = MariaDB
-baseurl = http://yum.mariadb.org/10.5/centos7-amd64
+baseurl = http://yum.mariadb.org/10.4/centos7-amd64
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=1
 EOF
@@ -392,20 +394,21 @@ EOF
 
     #all pre-upgrade operation for CentOS 7
   elif [[ "$Server_OS_Version" = "8" ]] ; then
-    cat <<EOF >/etc/yum.repos.d/CentOS-PowerTools-CyberPanel.repo
-[powertools-for-cyberpanel]
-name=CentOS Linux \$releasever - PowerTools
-mirrorlist=http://mirrorlist.centos.org/?release=\$releasever&arch=\$basearch&repo=PowerTools&infra=\$infra
-baseurl=http://mirror.centos.org/\$contentdir/\$releasever/PowerTools/\$basearch/os/
-gpgcheck=1
-enabled=1
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
-EOF
+#    cat <<EOF >/etc/yum.repos.d/CentOS-PowerTools-CyberPanel.repo
+#[powertools-for-cyberpanel]
+#name=CentOS Linux \$releasever - PowerTools
+#mirrorlist=http://mirrorlist.centos.org/?release=\$releasever&arch=\$basearch&repo=PowerTools&infra=\$infra
+#baseurl=http://mirror.centos.org/\$contentdir/\$releasever/PowerTools/\$basearch/os/
+#gpgcheck=1
+#enabled=1
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+#EOF
+  rm -f /etc/yum.repos.d/CentOS-PowerTools-CyberPanel.repo
 
   if [[ "$Server_Country" = "CN" ]] ; then
-    dnf --nogpg install -y https://cyberpanel.sh/mirror.ghettoforge.org/distributions/gf/el/8/gf/x86_64/gf-release-8-11.gf.el8.noarch.rpm
+    dnf --nogpg install -y https://cyberpanel.sh/mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el8.noarch.rpm
   else
-    dnf --nogpg install -y https://mirror.ghettoforge.org/distributions/gf/el/8/gf/x86_64/gf-release-8-11.gf.el8.noarch.rpm
+    dnf --nogpg install -y https://mirror.ghettoforge.org/distributions/gf/gf-release-latest.gf.el8.noarch.rpm
   fi
 
   dnf install epel-release -y
@@ -445,6 +448,18 @@ elif [[ "$Server_OS" = "Ubuntu" ]] ; then
   fi
 #all pre-upgrade operation for Ubuntu 20
 fi
+if [[ "$Server_OS" = "openEuler" ]] ; then
+  rm -f /etc/yum.repos.d/CyberPanel.repo
+  rm -f /etc/yum.repos.d/litespeed.repo
+
+  yum clean all
+  yum update -y
+
+  dnf install -y wget strace htop net-tools telnet curl which bc telnet htop libevent-devel gcc libattr-devel xz-devel mariadb-devel curl-devel git python3-devel tar socat bind-utils
+  dnf install gpgme-devel -y
+  dnf install python3 -y
+fi
+#all pre-upgrade operation for openEuler
 }
 
 Download_Requirement() {
@@ -459,7 +474,7 @@ for i in {1..50};
     sleep 30
   fi
 done
-#special made function for Gitee.com , for whatever reason , sometimes it fails to download this file
+#special made function for Gitee.com, for whatever reason sometimes it fails to download this file
 }
 
 
@@ -475,12 +490,12 @@ else
 fi
 
 if [[ -f /usr/local/CyberPanel/bin/python2 ]]; then
-  echo -e "\nPython 2 dectected, doing resetup...\n"
+  echo -e "\nPython 2 dectected, doing re-setup...\n"
   rm -rf /usr/local/CyberPanel/bin
   virtualenv -p /usr/bin/python3 --system-site-packages /usr/local/CyberPanel
   Check_Return
 elif [[ -d /usr/local/CyberPanel/bin/ ]]; then
-  echo -e "\nNo need to resetup virtualenv at /usr/local/CyberPanel...\n"
+  echo -e "\nNo need to re-setup virtualenv at /usr/local/CyberPanel...\n"
 else
   echo -e "\nNothing found, need fresh setup...\n"
   virtualenv -p /usr/bin/python3 --system-site-packages /usr/local/CyberPanel
@@ -501,6 +516,11 @@ elif [[ "$Server_OS" = "Ubuntu" ]] ; then
   # shellcheck disable=SC1091
   . /usr/local/CyberPanel/bin/activate
     Check_Return
+  pip3 install --default-timeout=3600 virtualenv==16.7.9
+    Check_Return
+  pip3 install --default-timeout=3600 --ignore-installed -r /usr/local/requirments.txt
+    Check_Return
+elif [[ "$Server_OS" = "openEuler" ]] ; then
   pip3 install --default-timeout=3600 virtualenv==16.7.9
     Check_Return
   pip3 install --default-timeout=3600 --ignore-installed -r /usr/local/requirments.txt
@@ -542,9 +562,9 @@ fi
 }
 
 Pre_Upgrade_Branch_Input() {
-  echo -e "\nPress Enter key to continue with latest version or Enter specific version such as: \e[31m1.9.4\e[39m , \e[31m1.9.5\e[39m ...etc"
-  echo -e "\nIf nothing is input in 10 seconds , script will proceed with latest stable. "
-  echo -e "\nPlease press Enter key , or specify a version number ,or wait for 10 seconds timeout: "
+  echo -e "\nPress the Enter key to continue with latest version, or enter specific version such as: \e[31m1.9.4\e[39m , \e[31m1.9.5\e[39m ...etc"
+  echo -e "\nIf nothing is input in 10 seconds, script will proceed with the latest stable version. "
+  echo -e "\nPlease press the Enter key or specify a version number, or wait for 10 seconds: "
   printf "%s" ""
   read -r -t 10 Tmp_Input
   if [[ $Tmp_Input = "" ]]; then
@@ -563,7 +583,7 @@ if [[ -f /usr/local/CyberCP/bin/python2 ]]; then
   virtualenv -p /usr/bin/python3 /usr/local/CyberCP
     Check_Return
 elif [[ -d /usr/local/CyberCP/bin/ ]]; then
-  echo -e "\nNo need to resetup virtualenv at /usr/local/CyberCP...\n"
+  echo -e "\nNo need to re-setup virtualenv at /usr/local/CyberCP...\n"
 else
   virtualenv -p /usr/bin/python3 --system-site-packages /usr/local/CyberCP
     Check_Return
@@ -676,6 +696,9 @@ if [[ -f /etc/cyberpanel/webadmin_passwd ]]; then
   chmod 600 /etc/cyberpanel/webadmin_passwd
 fi
 
+chown lsadm:lsadm /usr/local/lsws/admin/conf/htpasswd
+chmod 600 /usr/local/lsws/admin/conf/htpasswd
+
 if [[ -f /etc/pure-ftpd/pure-ftpd.conf ]]; then
   sed -i 's|NoAnonymous                 no|NoAnonymous                 yes|g' /etc/pure-ftpd/pure-ftpd.conf
 fi
@@ -728,7 +751,7 @@ if curl -I -XGET -k "https://127.0.0.1:${Panel_Port#*:}" | grep -q "200 OK" ; th
   echo "                CyberPanel Upgraded                                "
   echo "###################################################################"
 else
-  echo -e "\nSeems something wrong with upgarde, please check...\n"
+  echo -e "\nSeems something wrong with upgrade, please check...\n"
 fi
 rm -rf /root/cyberpanel_upgrade_tmp
 }
@@ -740,8 +763,10 @@ fi
 
 if [[ "$*" = *"--debug"* ]] ; then
   Debug="On"
-  rm -f /tmp/cyberpanel_debug_upgrade.log
-  echo -e "$(date)" > /tmp/cyberpanel_debug_upgrade.log
+  Random_Log_Name=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 5)
+  find /var/log -name 'cyberpanel_debug_upgrade_*' -exec rm {} +
+  echo -e "$(date)" > "/var/log/cyberpanel_debug_upgrade_$(date +"%Y-%m-%d")_${Random_Log_Name}.log"
+  chmod 600 "/var/log/cyberpanel_debug_upgrade_$(date +"%Y-%m-%d")_${Random_Log_Name}.log"
 fi
 
 Set_Default_Variables

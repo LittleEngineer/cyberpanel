@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     {% load static %}
-
+    <link rel="icon" type="image/png" href="{% static 'baseTemplate/assets/finalBase/favicon.png' %}">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -73,7 +73,7 @@
                     <a onclick="return false;" ng-click="showRenameModal()" class="nav-link point-events" href="#"><i class="fa fa-file-text-o" aria-hidden="true"></i>  {% trans "Rename" %}</a>
                 </li>
                 <li id="editFile" class="nav-item" >
-                    <a onclick="return false;" ng-click="showHTMLEditorModal()"  class="nav-link point-events" href="#"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>  {% trans "Edit" %}</a>
+                    <a onclick="return false;" ng-click="showHTMLEditorModal(1)"  class="nav-link point-events" href="#"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>  {% trans "Edit" %}</a>
                 </li>
                 <li id="compressFile" class="nav-item">
                     <a onclick="return false;" ng-click="showCompressionModal()" class="nav-link point-events" href="#"><i class="fa fa-compress" aria-hidden="true"></i>  {% trans "Compress" %}</a>

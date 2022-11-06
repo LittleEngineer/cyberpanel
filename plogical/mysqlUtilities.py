@@ -82,6 +82,9 @@ class mysqlUtilities:
 
                 mysqlUtilities.LOCALHOST = ipAddressLocal
 
+                if os.path.exists(ProcessUtilities.debugPath):
+                    logging.CyberCPLogFileWriter.writeToFile('Local IP for MySQL: %s' % (mysqlUtilities.LOCALHOST))
+
                 conn = mysql.connect(host=mysqlhost ,user=mysqluser, passwd=mysqlpassword, port=int(mysqlport), cursorclass=cursors.SSCursor)
                 cursor = conn.cursor()
 
@@ -109,18 +112,15 @@ class mysqlUtilities:
     @staticmethod
     def createDatabase(dbname,dbuser,dbpassword, dbcreate = 1, host = None):
         try:
-
-            if dbcreate:
-                HostToUse = mysqlUtilities.LOCALHOST
-            else:
-                HostToUse = host
-
             connection, cursor = mysqlUtilities.setupConnection()
 
             if connection == 0:
                 return 0
 
-
+            if dbcreate == 1:
+                HostToUse = mysqlUtilities.LOCALHOST
+            else:
+                HostToUse = host
             ## Create db
 
             if dbcreate:
@@ -164,7 +164,7 @@ class mysqlUtilities:
             if dbcreate:
                 if os.path.exists(ProcessUtilities.debugPath):
                     logging.CyberCPLogFileWriter.writeToFile('Deleting database because failed to create %s' % (dbname))
-                mysqlUtilities.deleteDatabase(dbname, dbuser)
+                #mysqlUtilities.deleteDatabase(dbname, dbuser)
             logging.CyberCPLogFileWriter.writeToFile(str(msg) + "[createDatabase]")
             return 0
 
@@ -348,6 +348,8 @@ password=%s
                 subprocess.call(shlex.split(command))
 
             command = 'mysql --defaults-extra-file=/home/cyberpanel/.my.cnf -u %s --host=%s --port %s %s' % (mysqluser, mysqlhost, mysqlport, databaseName)
+            if os.path.exists(ProcessUtilities.debugPath):
+                logging.CyberCPLogFileWriter.writeToFile(f'{command} {tempStoragePath}/{databaseName} ' )
             cmd = shlex.split(command)
 
             if additionalName == None:
@@ -596,7 +598,7 @@ password=%s
     @staticmethod
     def restartMySQL():
         try:
-            command = 'sudo systemctl restart mysql'
+            command = 'sudo systemctl restart mariadb'
             ProcessUtilities.executioner(command)
 
             return 1, None
@@ -838,6 +840,7 @@ password=%s
 
             if connection == 0:
                 return 0
+
             cursor.execute("use mysql")
 
             if host != None:
@@ -855,10 +858,10 @@ password=%s
             else:
                 query = "SET PASSWORD FOR '" + userName + "'@'%s' = '" % (LOCALHOST) + dbPassword + "'"
 
-            cursor.execute(query)
-
             if os.path.exists(ProcessUtilities.debugPath):
                 logging.CyberCPLogFileWriter.writeToFile(query)
+
+            cursor.execute(query)
 
             connection.close()
 
@@ -1031,6 +1034,7 @@ def main():
 
     if args.function == "enableRemoteMYSQL":
         mysqlUtilities.enableRemoteMYSQL()
+
 
 if __name__ == "__main__":
     main()

@@ -112,6 +112,19 @@
                                     class="btn btn-primary">{% trans "Add Site" %}</button>
                         </div>
 
+
+                        <div ng-hide="driveHidden" id="checkret" class="form-group">
+                            <label class="col-sm-3 control-label">{% trans "Backup File Retention" %} (<a href="https://cyberpanel.net/cyberpanel-addons">Paid Feature</a> )</label>
+                            <div class="col-sm-6">
+                                <select id="fileretention" ng-model="Retentiontime" ng-change="changeRetention()" class="form-control">
+                                    <option value="1d">1 days</option>
+                                    <option value="1w"> 1 week</option>
+                                    <option value="1m"> 1 month</option>
+                                    <option  value="6m"> 6 months</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div ng-hide="driveHidden" class="form-group">
                             <div class="row">
                                 <div style="margin-left: 2%" class="col-sm-3">
@@ -173,10 +186,7 @@
                                                                         <select ng-model="currentPageLogs"
                                                                                 class="form-control"
                                                                                 ng-change="fetchLogs()">
-                                                                            <option ng-repeat="page in paginationLogs">{$
-                                                                                $index + 1
-                                                                                $}
-                                                                            </option>
+                                                                            <option ng-repeat="page in paginationLogs">{$ $index + 1 $}</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -231,9 +241,7 @@
                                             <div class="form-group">
                                                 <select ng-model="currentPage" class="form-control"
                                                         ng-change="fetchWebsites()">
-                                                    <option ng-repeat="page in pagination">{$ $index + 1
-                                                        $}
-                                                    </option>
+                                                    <option ng-repeat="page in pagination">{$ $index + 1$}</option>
                                                 </select>
                                             </div>
                                         </div>

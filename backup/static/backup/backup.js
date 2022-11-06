@@ -1076,13 +1076,17 @@ app.controller('backupLogsScheduled', function ($scope, $http, $timeout) {
 
 ///** Backup site ends **///
 
+
+
+
+
 app.controller('googleDrive', function ($scope, $http) {
 
     $scope.cyberPanelLoading = true;
     $scope.driveHidden = true;
 
     $scope.setupAccount = function(){
-        window.open("https://cloud.cyberpanel.net/gDrive?name=" + $scope.accountName + '&server=' + window.location.href + 'Setup');
+        window.open("https://platform.cyberpersons.com/gDrive?name=" + $scope.accountName + '&server=' + window.location.href + 'Setup');
     };
 
     $scope.currentPage = 1;
@@ -1113,6 +1117,7 @@ app.controller('googleDrive', function ($scope, $http) {
             $scope.cyberPanelLoading = true;
             if (response.data.status === 1) {
                 $scope.driveHidden = false;
+                $('#checkret').show()
                 new PNotify({
                     title: 'Success',
                     text: 'Successfully fetched.',
@@ -1236,6 +1241,53 @@ app.controller('googleDrive', function ($scope, $http) {
 
 
     };
+
+    $scope.changeRetention = function () {
+        $scope.cyberPanelLoading = false;
+           var config = {
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        };
+        var data = {
+            Retentiontime: $scope.Retentiontime,
+            selectedAccount: $scope.selectedAccount,
+        };
+        dataurl = "/backup/changeFileRetention";
+
+
+        //console.log(data)
+
+        $http.post(dataurl, data, config).then(fileretention, cantLoadInitialData);
+
+            function fileretention(response) {
+                $scope.cyberPanelLoading = true;
+                if (response.data.status === 1) {
+                    new PNotify({
+                        title: 'Success',
+                        text: 'Changes successfully applied',
+                        type: 'success'
+                    });
+                    $scope.fetchWebsites();
+                } else {
+                    new PNotify({
+                        title: 'Operation Failed!',
+                        text: response.data.error_message,
+                        type: 'error'
+                    });
+                }
+            }
+            function cantLoadInitialData(response) {
+            $scope.cyberPanelLoading = true;
+            new PNotify({
+                title: 'Operation Failed!',
+                text: 'Could not connect to server, please refresh this page',
+                type: 'error'
+            });
+        }
+
+    };
+
 
     $scope.changeFrequency = function () {
         $scope.cyberPanelLoading = false;
